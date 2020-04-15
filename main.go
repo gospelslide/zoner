@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"github.com/gospelslide/zoner/geoindex"
 	"github.com/gospelslide/zoner/workerpool"
-	_"bufio"
-	_"os"
 	"time"
+	"net/http"
+	"strconv"
 )
 
-func writeLocations() {
+func writeLocations(w http.ResponseWriter, req *http.Request) {
 	// scanner := bufio.NewScanner(os.Stdin)
 	// for scanner.Scan() {
 	// 	workerpool.LocationWriteQueue <- scanner.Text()
 	// }
-	for i := 0; ; i++ {
-		workerpool.LocationWriteQueue <- geoindex.Location{Lat: 19.098874, Long: 72.908818}
-	}
+	lat, err := strconv.ParseFloat(req.URL.Query()["lat"][0], 64)
+	long, err := strconv.ParseFloat(req.URL.Query()["long"][0], 64)
+	if (err == nil) { workerpool.LocationWriteQueue <- geoindex.Location{Lat: lat, Long: long} }
 }
 
 func readIndexedLocations(done chan bool) {
@@ -36,8 +36,9 @@ func readIndexedLocations(done chan bool) {
 }
 
 func main() {
+	http.HandleFunc("/loc", writeLocations)
+	http.ListenAndServe(":8080", nil)
 	done := make(chan bool)
-	go writeLocations()
 	go readIndexedLocations(done)
 	workerpool.CreateLocationIndexWorkerPool(20)
 	<- done
