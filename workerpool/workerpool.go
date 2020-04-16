@@ -1,6 +1,7 @@
 package workerpool
 
 import (
+	"fmt"
 	"sync"
 	"github.com/gospelslide/zoner/geoindex"
 )

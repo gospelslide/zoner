@@ -17,6 +17,7 @@ func writeLocations(w http.ResponseWriter, req *http.Request) {
 	lat, err := strconv.ParseFloat(req.URL.Query()["lat"][0], 64)
 	long, err := strconv.ParseFloat(req.URL.Query()["long"][0], 64)
 	if (err == nil) { workerpool.LocationWriteQueue <- geoindex.Location{Lat: lat, Long: long} }
+	fmt.Fprint(w, "Ok")
 }
 
 func readIndexedLocations(done chan bool) {
@@ -35,13 +36,15 @@ func readIndexedLocations(done chan bool) {
 	done <- true
 }
 
-func main() {
-	http.HandleFunc("/loc", writeLocations)
-	http.ListenAndServe(":8080", nil)
+func initialise() {
 	done := make(chan bool)
 	go readIndexedLocations(done)
 	workerpool.CreateLocationIndexWorkerPool(20)
 	<- done
-	// loc := geoindex.Location{Lat: 19.098874, Long: 72.908818}
-	// fmt.Println(geoindex.LocationToGeoIndex(loc, 3).Index)
+}
+
+func main() {
+	go initialise()
+	http.HandleFunc("/loc", writeLocations)
+	http.ListenAndServe(":8080", nil)
 }
