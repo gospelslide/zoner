@@ -70,10 +70,10 @@ func indexAndMarshalData(r *http.Request) ([]byte, error) {
 	var lat, long float64
 	var err error
 	var granularity int64
-	lat, err = strconv.ParseFloat(r.URL.Query()["lat"][0], 64)
-	long, err = strconv.ParseFloat(r.URL.Query()["long"][0], 64)
-	locType := r.URL.Query()["locType"][0]
-	granularity, intErr := strconv.ParseInt(r.URL.Query()["granularity"][0], 10, 32)
+	lat, err = strconv.ParseFloat(readQueryParam("lat", r), 64)
+	long, err = strconv.ParseFloat(readQueryParam("long", r), 64)
+	locType := readQueryParam("locType", r)
+	granularity, intErr := strconv.ParseInt(readQueryParam("granularity", r), 10, 32)
 	if intErr != nil {
 		granularity = defaultGranularity
 	}
@@ -88,6 +88,14 @@ func indexAndMarshalData(r *http.Request) ([]byte, error) {
 	}
 	locationData = geoIndexLocation(locationData)
 	return json.Marshal(locationData)
+}
+
+func readQueryParam(param string, r *http.Request) string {
+	data := r.URL.Query().Get(param)
+	if (data != "") { 
+		return string(data[0]) 
+	}
+	return ""
 }
 
 func geoIndexLocation(data LocationData) LocationData {
