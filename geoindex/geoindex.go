@@ -92,7 +92,7 @@ func divideQuadrants(q, prevGranularity Quadrant, point Location, iter int) Quad
 }
 
 /*LocationToGeoIndex function to 
-@params - Location, int
+@params - Location struct, int granularity of index
 @return - Quadrant struct with axes, lat long boundaries and index
 */
 func LocationToGeoIndex(point Location, granularity int) Location {
